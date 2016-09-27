@@ -14,6 +14,32 @@ class Reply
     Reply.new(result)
   end
 
+  def find_by_user_id(user_id)
+    results = QuestionsDB.instance.execute(<<-SQL, user_id)
+      SELECT
+        *
+      FROM
+        replies
+      WHERE
+        user_id = ?
+    SQL
+
+    results.map { |result| Reply.new(result) }
+  end
+
+  def find_by_question_id(question_id)
+    results = QuestionsDB.instance.execute(<<-SQL, question_id)
+      SELECT
+        *
+      FROM
+        replies
+      WHERE
+        question_id = ?
+    SQL
+
+    results.map { |result| Reply.new(result) }
+  end
+
   attr_accessor :question_id, :reply_id, :user_id, :body
 
   def initialize(options)
@@ -22,6 +48,31 @@ class Reply
     @reply_id = options['reply_id']
     @user_id = options['user_id']
     @body = options['body']
+  end
+
+  def author
+    User.find_by_id(@user_id)
+  end
+
+  def question
+    Questions.find_by_id(@question_id)
+  end
+
+  def parent_reply
+    Reply.find_by_id(@reply_id)
+  end
+
+  def child_reply
+    results = QuestionsDB.instance.execute(<<-SQL, @id)
+      SELECT
+        *
+      FROM
+        replies
+      WHERE
+        reply_id = ?
+    SQL
+
+    results.map { |result| Reply.new(result) }
   end
 
 end
