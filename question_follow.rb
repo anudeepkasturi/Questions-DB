@@ -27,7 +27,7 @@ class QuestionFollow
     results.map { |result| Question.find_by_id(result) }
   end
 
-  def most_followed_questions(n)
+  def self.most_followed_questions(n)
     results = QuestionsDB.instance.execute(<<-SQL, n)
       SELECT
         question_id
@@ -41,5 +41,14 @@ class QuestionFollow
     SQL
 
     results.map { |result| Question.find_by_id(result) }
+  end
+
+  def self.create(question_id, user_id)
+    QuestionsDB.instance.execute(<<-SQL, question_id, user_id)
+      INSERT INTO
+        questions_follows (question_id, user_id)
+      VALUES
+        (?, ?)
+    SQL
   end
 end

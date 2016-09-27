@@ -61,7 +61,8 @@ INSERT INTO
   questions (title, body, author_id)
 VALUES
   ('Life', 'What is the meaning of life?', 1),
-  ('Assessment', 'Does my life depend on passing the assessment?', 2);
+  ('Day', 'What day is it?', 1),
+  ('Assessment', 'Does my life depend on passing the assessment?', 1);
 
 INSERT INTO
   questions_follows (user_id, question_id)

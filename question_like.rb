@@ -37,4 +37,29 @@ class QuestionLike
 
     results.map { |result| Question.find_by_id(result) }
   end
+
+  def self.most_liked_questions(n)
+    results = QuestionsDB.instance.execute(<<-SQL, n)
+      SELECT
+        question_id
+      FROM
+        questions_likes
+      GROUP BY
+        question_id
+      ORDER BY
+        COUNT(user_id) DESC
+      LIMIT ?
+    SQL
+
+    results.map { |result| Question.find_by_id(result) }
+  end
+
+  def self.create(question_id, user_id)
+    QuestionsDB.instance.execute(<<-SQL, question_id, user_id)
+      INSERT INTO
+        questions_likes (question_id, user_id)
+      VALUES
+        (?, ?)
+    SQL
+  end
 end

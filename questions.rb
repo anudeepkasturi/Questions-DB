@@ -46,6 +46,10 @@ class Question
     QuestionFollow.most_followed_questions(n)
   end
 
+  def self.most_liked(n)
+    QuestionLike.most_liked_questions(n)
+  end
+
   attr_accessor :body, :title, :author_id
 
   def initialize(options)
@@ -53,6 +57,29 @@ class Question
     @title = options['title']
     @body = options['body']
     @author_id = options['author_id']
+  end
+
+  def create
+    raise "#{self} already in database" if @id
+    QuestionsDB.instance.execute(<<-SQL, @title, @body, @author_id)
+      INSERT INTO
+        questions (title, body, author_id)
+      VALUES
+        (?, ?, ?)
+    SQL
+    @id = QuestionsDB.instance.last_insert_row_id
+  end
+
+  def update
+    raise "#{self} already in database" unless @id
+    QuestionsDB.instance.execute(<<-SQL, @title, @body, @author_id, @id)
+      UPDATE
+        questions
+      SET
+        title = ?, body = ?, author_id = ?
+      WHERE
+        id = ?
+    SQL
   end
 
   def author
