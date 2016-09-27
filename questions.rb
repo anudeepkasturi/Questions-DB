@@ -1,5 +1,9 @@
 require 'sqlite3'
 require 'singleton'
+require_relative 'question_follow'
+require_relative 'question_like'
+require_relative 'user'
+require_relative 'reply'
 
 class QuestionsDB < SQLite3::Database
   include Singleton
@@ -38,6 +42,10 @@ class Question
     results.map { |result| Question.new(result) }
   end
 
+  def self.most_followed(n)
+    QuestionFollow.most_followed_questions(n)
+  end
+
   attr_accessor :body, :title, :author_id
 
   def initialize(options)
@@ -59,32 +67,11 @@ class Question
     QuestionFollow.followers_for_question_id(@id)
   end
 
-end
-
-class QuestionFollow
-  def self.followers_for_question_id(question_id)
-    results = QuestionsDB.instance.execute(<<-SQL, question_id)
-      SELECT
-        user_id
-      FROM
-        questions_follows
-      WHERE
-        question_id = ?
-    SQL
-
-    results.map { |result| User.find_by_id(result) }
+  def likers
+    QuestionLike.likers_for_question_id(@id)
   end
 
-  def self.followed_questions_for_user_id(user_id)
-    results = QuestionsDB.instance.execute(<<-SQL, user_id)
-      SELECT
-        question_id
-      FROM
-        questions_follows
-      WHERE
-        user_id = ?
-    SQL
-
-    results.map { |result| Question.find_by_id(result) }
+  def num_likes
+    QuestionLike.num_likes_for_question_id(@id)
   end
 end
